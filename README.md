@@ -7,11 +7,6 @@ TODO:
 
 TEST CASES!!!
 
-Task III:
-
-Fix Priority Queue then everything should work.
-
-
 Task V
 
 Everything
