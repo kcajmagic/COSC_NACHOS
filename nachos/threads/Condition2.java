@@ -82,6 +82,51 @@ public class Condition2 {
 			wake();
 		}
 	}
+	
+	public static void selfTest() {
+
+		System.out.print("Enter Condition2.selfTest\n");	
+
+		final Lock lock = new Lock();
+		final Condition2 condition = new Condition2(lock); 
+
+		KThread t[] = new KThread[10];
+		for (int i=0; i<10; i++) {
+			t[i] = new KThread(new Runnable() {
+				
+				public void run() {
+					
+					lock.acquire();
+
+			        System.out.print(KThread.currentThread().getName() + " acquired lock\n");	
+			        condition.sleep();
+			        System.out.print(KThread.currentThread().getName() + " acquired lock again\n");	
+
+			        lock.release();
+			        System.out.print(KThread.currentThread().getName() + " released lock \n");	
+					
+				}
+			});
+			t[i].setName("Thread" + i).fork();
+		}
+
+		KThread.yield();
+
+		lock.acquire();
+
+		System.out.print("condition.wake();\n");	
+		condition.wake();
+
+		System.out.print("condition.wakeAll();\n");	
+		condition.wakeAll();
+
+		lock.release();
+
+		System.out.print("Leave Condition2.selfTest\n");	
+
+		t[9].join();
+
+	}
 
 	private Lock conditionLock;
 }
