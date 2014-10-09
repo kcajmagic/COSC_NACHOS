@@ -7,6 +7,8 @@ import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.sun.xml.internal.messaging.saaj.util.transform.EfficientStreamingTransformer;
+
 /**
  * A scheduler that chooses threads based on their priorities.
  *
@@ -127,6 +129,12 @@ public class PriorityScheduler extends Scheduler {
 	 * A <tt>ThreadQueue</tt> that sorts threads by priority.
 	 */
 	protected class PriorityQueue extends ThreadQueue {
+		// For ThreadState
+		private boolean altered;
+		private int effectivePriority;
+		private ThreadState holder = null;
+		private LinkedList<KThread> waitQ = new LinkedList<KThread>();
+		
 		PriorityQueue(boolean transferPriority) {
 			this.transferPriority = transferPriority;
 		}
@@ -164,6 +172,39 @@ public class PriorityScheduler extends Scheduler {
 			// implement me (if you want)
 		}
 
+		/**
+		 * Code for ThreadState to work
+		 * TODO Don't think this is needed
+		 */
+		public int getEffectivePriority(){
+			if(!transferPriority){
+				return priorityMinimum;
+			}
+			if(altered){
+				effectivePriority = priorityMinimum;
+				for (Iterator<KThread> it = waitQ.iterator(); it.hasNext();) {  
+					KThread thread = it.next(); 
+					int priority = getThreadState(thread).getEffectivePriority();
+					if ( priority > effectivePriority) { 
+						effectivePriority = priority;
+					}
+				}
+				altered = false;
+			}
+			return effectivePriority;
+		}
+		
+		public void setAltered(){
+			if(!transferPriority){
+				return;
+			}
+			altered = true;
+			if(holder != null){
+				holder.setAltered();
+			}
+			
+		}
+		
 		/**
 		 * <tt>true</tt> if this queue should transfer priority from waiting
 		 * threads to the owning thread.
@@ -217,7 +258,7 @@ public class PriorityScheduler extends Scheduler {
 			if(altered){
 				for(Iterator<ThreadQueue> iter = threads.iterator(); iter.hasNext();){
 					PriorityQueue pQueue = (PriorityQueue)(iter.next());
-					int effective = 5;//pQueue.getEffectivePriority();
+					int effective = pQueue.getEffectivePriority();
 					if(maxEffectivePriority < effective){
 						maxEffectivePriority = effective;
 					}
@@ -284,7 +325,7 @@ public class PriorityScheduler extends Scheduler {
 				altered = true;
 				PriorityQueue pQueue = (PriorityQueue)isWaiting;
 				if(pQueue != null){
-					//pQueue.setAltered();
+					pQueue.setAltered();
 				}
 			}
 		}
