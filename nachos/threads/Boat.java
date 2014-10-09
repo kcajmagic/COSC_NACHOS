@@ -61,14 +61,14 @@ public class Boat
 			thread.fork();
 		}
 		
-		Runnable r = new Runnable() {
-			public void run() {
-				SampleItinerary();
-			}
-		};
-		KThread t = new KThread(r);
-		t.setName("Sample Boat Thread");
-		t.fork();
+//		Runnable r = new Runnable() {
+//			public void run() {
+//				SampleItinerary();
+//			}
+//		};
+//		KThread t = new KThread(r);
+//		t.setName("Sample Boat Thread");
+//		t.fork();
 
 	}
 
