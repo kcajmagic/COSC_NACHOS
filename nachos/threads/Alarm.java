@@ -1,5 +1,6 @@
 package nachos.threads;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import nachos.machine.*;
@@ -19,9 +20,10 @@ public class Alarm {
 	 * alarm.
 	 */
 	
-	//THIS IS MY NEW COMMENT YO TO TEST GITHUB
+	
 	public Alarm() {
-		waitingQ = new PriorityQueue<KThread>();
+		// 11 because its the default value of regular Priority Queues
+		waitingQ = new PriorityQueue<KThread>(11, new SortQueueViaPriority());
 		
 		Machine.timer().setInterruptHandler(new Runnable() {
 			public void run() { timerInterrupt(); }
@@ -35,22 +37,25 @@ public class Alarm {
 	 * that should be run.
 	 */
 	public void timerInterrupt() {
+		// Quick Return
+		if(waitingQ.isEmpty()){
+			return;
+		}
+		// Get the current Time
 		long currentTime = Machine.timer().getTime();
 		
-//		while(!waitingQ.isEmpty()){
-//			if(waitingQ.first().time <= time){
-//				
-//				waitingQ.first.thread.ready();
-//				waiting.remove(waitingQ.first);
-//			}else{
-//				return;
-//			}
-//		}
-//		
-		// Not Need No More
-	//	KThread.currentThread().yield();
-		
-		
+		while(!waitingQ.isEmpty()){
+			if(waitingQ.element().priority <= currentTime){
+				// Get the element with the highest priority
+				KThread thread = waitingQ.element();
+				// Remove it from waiting
+				waitingQ.remove(thread);
+				// Make it ready
+				thread.ready();
+			}else{
+				return;
+			}
+		}
 	}
 
 	/**
@@ -72,16 +77,21 @@ public class Alarm {
 		boolean intStatus = Machine.interrupt().disable();
 		
 		long priortyTime = Machine.timer().getTime() + x;
+		KThread.currentThread().priority = priortyTime;
 		waitingQ.add(KThread.currentThread());
 		KThread.sleep();
 		
 		//Enable Interrupts
 		Machine.interrupt().restore(intStatus);
-		
-		
-		// for now, cheat just to get something working (busy waiting is bad)
-		long wakeTime = Machine.timer().getTime() + x;
-		while (wakeTime > Machine.timer().getTime())
-			KThread.yield();
 	}
+}
+
+class SortQueueViaPriority implements Comparator<KThread> {
+	// For Sorting the Priority Queue
+	public int compare(KThread thread1, KThread thread2) {
+		if (thread1.priority == thread2.priority) return 0;
+        return thread1.priority > thread2.priority ? 1 : -1;
+	}
+
+
 }

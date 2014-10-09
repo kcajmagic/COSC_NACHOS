@@ -30,6 +30,9 @@ import nachos.machine.*;
 public class KThread {
 	// Variable that will be used
 	private ThreadQueue joinQ = null; 
+	
+	//Used for the Alarm Class Priority Queue
+	public long priority;
 
 
 	/**
@@ -117,7 +120,7 @@ public class KThread {
 	public String toString() {
 		return (name + " (#" + id + ")");
 	}
-
+	
 	/**
 	 * Deterministically and consistently compare this thread to another
 	 * thread.
