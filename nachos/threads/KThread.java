@@ -429,53 +429,53 @@ public class KThread {
 		new KThread(new PingTest(1)).setName("forked thread").fork();
 		new PingTest(0).run();
 		
-		// TODO Fix self Test
-//		Runnable myrunnable1 = new Runnable() {
-//
-//			public void run() { 
-//				int i = 0;
-//				while(i < 10) { 
-//					System.out.println("*** in while1 loop " + i + " ***");
-//					i++;
-//				} /*yield();*/ 
-//			}
-//		};
-//
-//		final KThread testThread = new KThread(myrunnable1);
-//		testThread.setName("child 1");
-//
-//
-//		// t1.join();
-//
-//		Runnable myrunnable2 = new Runnable() {
-//			public void run() { 
-//				System.out.println("selfTest2::Runnable");
-//				testThread.join();
-//				int i = 0;
-//				while(i < 10) { 
-//					System.out.println("*** in while2 loop " + i + " ***");
-//					i++;
-//				} /*yield();*/ 
-//			}
-//		};
-//
-//		KThread t2 = new KThread(myrunnable2);
-//		t2.setName("child 2");
-//
-//		System.out.println("*** t2.fork ***");
-//		t2.fork();
-//
-//		System.out.println("*** t1.fork ***");
-//		testThread.fork();
-//
-//
-//		System.out.println("*** T2 enter join ***");
-//		t2.join();
-//		System.out.println("*** T2 leave join ***");
-//		// t2.join();
-//
-//		// Add current thread to ready queue, and switch context
-//		yield();
+		
+		Runnable myrunnable1 = new Runnable() {
+
+			public void run() { 
+				int i = 0;
+				while(i < 10) { 
+					System.out.println("*** in while1 loop " + i + " ***");
+					i++;
+				} /*yield();*/ 
+			}
+		};
+
+		final KThread testThread = new KThread(myrunnable1);
+		testThread.setName("child 1");
+
+
+		// t1.join();
+
+		Runnable myrunnable2 = new Runnable() {
+			public void run() { 
+				System.out.println("selfTest2::Runnable");
+				testThread.join();
+				int i = 0;
+				while(i < 10) { 
+					System.out.println("*** in while2 loop " + i + " ***");
+					i++;
+				} /*yield();*/ 
+			}
+		};
+
+		KThread t2 = new KThread(myrunnable2);
+		t2.setName("child 2");
+
+		System.out.println("*** t2.fork ***");
+		t2.fork();
+
+		System.out.println("*** t1.fork ***");
+		testThread.fork();
+
+
+		System.out.println("*** T2 enter join ***");
+		t2.join();
+		System.out.println("*** T2 leave join ***");
+		// t2.join();
+
+		// Add current thread to ready queue, and switch context
+		yield();
 
 		
 	}

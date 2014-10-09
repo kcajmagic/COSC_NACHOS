@@ -149,10 +149,15 @@ public class AutoGrader {
 	}
 
 	void run() {
+		// TODO Self Test Goes Here
+		KThread thread = new KThread();
+		thread.selfTest();
+		
+		
 		kernel.selfTest();
 		kernel.run();
 		kernel.terminate();
-		// TODO Self Test Goes Here Actualy Dont know
+		
 	}
 
 	Privilege privilege = null;
