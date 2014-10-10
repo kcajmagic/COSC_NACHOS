@@ -5,9 +5,6 @@ import nachos.machine.Machine;
 public class Boat
 {
 	static BoatGrader bg;
-	static int totalKids;
-	static int totalAdults;
-	static boolean allThreadsIncd;
 	static int awakeKidsOahu;
 	static int kidsOnOahu;
 	static int adultsOnOahu;
@@ -21,14 +18,14 @@ public class Boat
 	{
 		BoatGrader b = new BoatGrader();
 
-//		System.out.println("\n ***Testing Boats with only 2 children***");
-//		begin(0, 2, b);
+		//		System.out.println("\n ***Testing Boats with only 2 children***");
+		//		begin(0, 2, b);
 
 		//	System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
 		//  	begin(1, 2, b);
 
-		  	System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
-		  	begin(3, 3, b);
+		System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
+		begin(12, 3, b);
 	}
 
 	public static void begin( int adults, int children, BoatGrader b )
@@ -38,7 +35,7 @@ public class Boat
 		bg = b;
 
 		// Instantiate global variables here
-		
+
 		// Create threads here. See section 3.4 of the Nachos for Java
 		// Walkthrough linked from the projects page.
 		done = false;
@@ -46,7 +43,7 @@ public class Boat
 		sleepingAdultsOahu = new Condition2(boatLock);
 		sleepingKidsMolokai = new Condition2(boatLock);
 		sleepingKidsOahu = new Condition2(boatLock);
-				
+		KThread threadR = null;
 		for(int i = 0; i < children; i++){
 			KThread thread = new KThread(new Runnable(){
 				public void run(){
@@ -55,8 +52,11 @@ public class Boat
 			});
 			thread.setName("Child #"+ i);
 			thread.fork();
+			
+			if(i==0){
+				threadR = thread;
+			}
 		}
-		
 		for(int i = 0; i < adults; i++){
 			KThread thread = new KThread(new Runnable(){
 				public void run(){
@@ -66,15 +66,22 @@ public class Boat
 			thread.setName("Adults #" + i);
 			thread.fork();
 		}
-		
-//		Runnable r = new Runnable() {
-//			public void run() {
-//				SampleItinerary();
-//			}
-//		};
-//		KThread t = new KThread(r);
-//		t.setName("Sample Boat Thread");
-//		t.fork();
+
+		System.out.println("Starting the Boat Trip to Molokai");
+		boolean intStatus = Machine.interrupt().disable();
+		ThreadedKernel.scheduler.setPriority(KThread.currentThread(), 0);
+		Machine.interrupt().restore(intStatus);
+		KThread.yield();
+		System.out.println("Finished the Boad Trip to Molokai");
+
+		//		Runnable r = new Runnable() {
+		//			public void run() {
+		//				SampleItinerary();
+		//			}
+		//		};
+		//		KThread t = new KThread(r);
+		//		t.setName("Sample Boat Thread");
+		//		t.fork();
 
 	}
 
@@ -89,73 +96,68 @@ public class Boat
 	       bg.AdultRowToMolokai();
 	   indicates that an adult has rowed the boat across to Molokai
 		 */
-		
-		if(!allThreadsIncd){
-			totalAdults++;
-			adultsOnOahu++;
-			boatLock.acquire();
-			sleepingAdultsOahu.sleep();
-			boatLock.release();
-		}
-		System.out.println("Threads are incD adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+
+		//		if(!allThreadsIncd){
+		//			totalAdults++;
+		//			adultsOnOahu++;
+		//			boatLock.acquire();
+		//			sleepingAdultsOahu.sleep();
+		//			boatLock.release();
+		//		}
+		//		System.out.println("Threads are incD adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+		//		bg.AdultRowToMolokai();
+		//		adultsOnOahu--;
+		//		boatLock.acquire();
+		//		sleepingKidsMolokai.wake();
+		//		boatLock.release();
+
+		adultsOnOahu++;
+		boatLock.acquire();
+		sleepingAdultsOahu.sleep();
 		bg.AdultRowToMolokai();
 		adultsOnOahu--;
-		boatLock.acquire();
+		System.out.println("Adult row to Molokai, woke kid: kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+		System.out.println("waitQ Sleeping kids molokai size "+ sleepingKidsOahu.waitQ.size());
 		sleepingKidsMolokai.wake();
 		boatLock.release();
-		
-		
 	}
 
 	static void ChildItinerary()
 	{
 		bg.initializeChild(); //Required for autograder interface. Must be the first thing called.
 		//DO NOT PUT ANYTHING ABOVE THIS LINE. 
+
 		boolean onOahu = true;
-		if(!allThreadsIncd){
-			totalKids++;
-			kidsOnOahu++;
-			awakeKidsOahu++;
-			System.out.println("Threads aren't incD kid");
-		}
+		kidsOnOahu++;
+		awakeKidsOahu++;
 		KThread.yield();
-		System.out.println("Threads are incD kid. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-		allThreadsIncd = true;
 		if(awakeKidsOahu > 2){
-			System.out.println("There are more than 2 awake kids on Oahu so im sleeping");
 			awakeKidsOahu--;
+			System.out.println("Going to sleep kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 			boatLock.acquire();
 			sleepingKidsOahu.sleep();
 			boatLock.release();
 		}
-		
 		while(!done){
+			boatLock.acquire();
 			if(onOahu){
 				if(awakeKidsOahu == 2){
-					System.out.println("Before row to mol. There are " + awakeKidsOahu + " awake kids on Oahu");
 					bg.ChildRowToMolokai();
 					onOahu = false;
 					awakeKidsOahu--;
 					kidsOnOahu--;
-					boatLock.acquire();
-					System.out.println("sleeping after rowing");
+					System.out.println("Child Row to Molokai, going to sleep kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					sleepingKidsMolokai.sleep();
-					System.out.println("rowing done. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-					boatLock.release();
-				}else if(awakeKidsOahu == 1) {
+				} else {
 					bg.ChildRideToMolokai();
 					onOahu = false;
 					awakeKidsOahu--;
 					kidsOnOahu--;
-					boatLock.acquire();
-					sleepingKidsMolokai.wake();
-					sleepingKidsMolokai.sleep();
-					boatLock.release();
-					System.out.println("riding done, after release. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+					System.out.println("Child Ride to Molokai kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				}
 			} else {
 				if(adultsOnOahu == 0 && kidsOnOahu == 0){
-					System.out.println("Finnsihing TotalKids " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+					System.out.println("All Done kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					done = true;
 					return;
 				}
@@ -163,23 +165,25 @@ public class Boat
 				onOahu = true;
 				kidsOnOahu++;
 				awakeKidsOahu++;
+				System.out.println("Child Row to Oaho kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				if(kidsOnOahu > 1){
-					boatLock.acquire();
-					awakeKidsOahu++;
+					System.out.println("waitQ kids on Oahu size "+ sleepingKidsOahu.waitQ.size());
 					sleepingKidsOahu.wake();
-					System.out.println("Woke kid on Oahu up. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-					boatLock.release();
+					System.out.println("waitQ wake up sleeping kid size "+ sleepingKidsOahu.waitQ.size());
+					awakeKidsOahu++;
+					System.out.println("Woke kid kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				} else {
-					boatLock.acquire();
+					System.out.println("waitQ Sleeping Adults size "+ sleepingAdultsOahu.waitQ.size());
 					sleepingAdultsOahu.wake();
-					System.out.println("woke adult, now sleeping");
+					System.out.println("waitQ waking up sleeping adult size "+ sleepingKidsOahu.waitQ.size());
 					awakeKidsOahu--;
+					System.out.println("Woke adult, going to sleep kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					sleepingKidsOahu.sleep();
-					System.out.println("riding to oahu done, after woke adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-					boatLock.release();
 				}
 			}
+			boatLock.release();
 		}
+
 	}
 
 	static void SampleItinerary()

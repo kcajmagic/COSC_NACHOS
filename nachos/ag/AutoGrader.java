@@ -163,17 +163,17 @@ public class AutoGrader {
 //		Alarm alarm = new Alarm();
 //		alarm.selfTest();
 		
-		// TASK IV
-		Communicator com = new Communicator();
-		com.selfTest();
+//		// TASK IV
+//		Communicator com = new Communicator();
+//		com.selfTest();
 		
 //		// TASK V
 //		PriorityScheduler scheduler = new PriorityScheduler();
 //		scheduler.selfTest();
 				
-//		// TASK VI
-//		Boat boat = new Boat();
-//		boat.selfTest();
+		// TASK VI
+		Boat boat = new Boat();
+		boat.selfTest();
 		
 			
 		kernel.selfTest();

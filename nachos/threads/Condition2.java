@@ -15,7 +15,7 @@ import nachos.machine.*;
  */
 public class Condition2 {
 	// New variable waitQ
-	private LinkedList<KThread> waitQ;
+	public LinkedList<KThread> waitQ;
 
 	/**
 	 * Allocate a new condition variable.
