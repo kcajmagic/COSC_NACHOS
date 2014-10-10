@@ -159,13 +159,13 @@ public class AutoGrader {
 //		Condition2 condition2 = new Condition2(testLock);
 //		condition2.selfTest();
 		
-		// TASK III     
-		Alarm alarm = new Alarm();
-		alarm.selfTest();
+//		// TASK III     
+//		Alarm alarm = new Alarm();
+//		alarm.selfTest();
 		
-//		// TASK IV
-//		Communicator com = new Communicator();
-//		com.selfTest();
+		// TASK IV
+		Communicator com = new Communicator();
+		com.selfTest();
 		
 //		// TASK V
 //		PriorityScheduler scheduler = new PriorityScheduler();

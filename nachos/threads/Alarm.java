@@ -92,26 +92,41 @@ public class Alarm {
 
 		System.out.print("Enter Alarm.selfTest\n");	
 
-		Runnable r = new Runnable() {
+		Runnable rShort = new Runnable() {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " alarm Time: " + Machine.timer().getTime());
-			
-		        ThreadedKernel.alarm.waitUntil(100);
-		        System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (100));	
-				
+
+				ThreadedKernel.alarm.waitUntil(10);
+				System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (10));	
+
+			}
+		};
+
+		Runnable rLong = new Runnable() {
+			public void run() {
+				System.out.println(KThread.currentThread().getName() + " alarm Time: " + Machine.timer().getTime());
+
+				ThreadedKernel.alarm.waitUntil(200);
+				System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (200));	
+
 			}
 		};
 
 		KThread t[] = new KThread[10];
 		for (int i=0; i<10; i++) {
-			t[i] = new KThread(r);
+			if(i%2==0){
+				t[i] = new KThread(rLong);
+			}else{
+				t[i] = new KThread(rShort);
+			}
 			t[i].setName("Thread" + i).fork();
 		}
-	
+
 		KThread.yield();
-		
-		ThreadedKernel.alarm.timerInterrupt();
-		KThread.yield();
+		for(int i = 0; i < 1000; i++){
+			ThreadedKernel.alarm.timerInterrupt();
+			KThread.yield();
+		}
 		System.out.print("Leave Alarm.selfTest\n");	
 
 	}
