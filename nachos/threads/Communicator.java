@@ -53,9 +53,7 @@ public class Communicator {
 		}
 		this.word = word;
 		this.isWordReady = true;
-
 		listenerCond.wakeAll();
-
 		speaker--;
 
 		lock.release();
@@ -71,17 +69,14 @@ public class Communicator {
 		lock.acquire();
 
 		listener++;
-
 		while(!isWordReady){
 			speakerCond.wakeAll();
 			listenerCond.sleep();
 		}
 		int word = this.word;
-
 		isWordReady = false;
-
 		listener--;
-
+		
 		lock.release();
 
 		return word;
@@ -121,37 +116,17 @@ public class Communicator {
 	}
 
 	public static void selfTest() {
+		System.out.println("***  Enter Communicator Self Test  ***");	
 
-		System.out.println("Enter Communicator.selfTest");	
-
-		System.out.println("VAR1: Test for one speaker, one listener, speaker waits for listener");	
-
-
+		System.out.println("** TEST 1: Test for one speaker, one listener, speaker waits for listener");	
 		Communicator comm1 = new Communicator();
-		KThread threadSpeaker =  new KThread(new Speaker(comm1, 100));
-		threadSpeaker.setName("Thread speaker").fork();
+		KThread threadSpeaker1 =  new KThread(new Speaker(comm1, 100));
+		threadSpeaker1.setName("Thread Speaker").fork();
 
 		KThread.yield();
 
-		KThread threadListener = new KThread(new Listener(comm1));
-		threadListener.setName("Thread listner").fork();
-
-		KThread.yield();
-
-		threadListener.join();
-		threadSpeaker.join();
-
-
-		System.out.println("VAR2: Test for one speaker, one listener, listener waits for speaker");	
-		Communicator comm2 = new Communicator();
-
-		KThread threadListener1 = new KThread(new Listener(comm2));
-		threadListener1.setName("Thread listner").fork();
-
-		KThread.yield();
-
-		KThread threadSpeaker1 =  new KThread(new Speaker(comm2, 100));
-		threadSpeaker1.setName("Thread speaker").fork();
+		KThread threadListener1 = new KThread(new Listener(comm1));
+		threadListener1.setName("Thread Listener").fork();
 
 		KThread.yield();
 
@@ -159,64 +134,76 @@ public class Communicator {
 		threadSpeaker1.join();
 
 
-		System.out.println("VAR3:  Test for more speakers, more listeners, listeners waits for speakers");	
+		System.out.println("** TEST 2: Test for one speaker, one listener, listener waits for speaker");	
+		Communicator comm2 = new Communicator();
+
+		KThread threadListener2 = new KThread(new Listener(comm2));
+		threadListener2.setName("Thread Listener").fork();
+
+		KThread.yield();
+
+		KThread threadSpeaker2 =  new KThread(new Speaker(comm2, 100));
+		threadSpeaker2.setName("Thread Speaker").fork();
+
+		KThread.yield();
+
+		threadListener2.join();
+		threadSpeaker2.join();
+
+		
+		System.out.println("** TEST 3:  Test for more speakers, more listeners, listeners waits for speakers");	
 		Communicator comm3 = new Communicator();
 
-		KThread ts9[] = new KThread[10];
+		KThread threadsSpeaker3[] = new KThread[10];
 		for (int i = 0; i < 10; i++) {
-			ts9[i] = new KThread(new Speaker(comm3, (i+1)*100));
-			ts9[i].setName("Speaker Thread" + i).fork();
+			threadsSpeaker3[i] = new KThread(new Speaker(comm3, (i+1)*100));
+			threadsSpeaker3[i].setName("Speaker #" + i).fork();
 		}
 
 		KThread.yield();
 
-		KThread tl9[] = new KThread[10];
+		KThread threadsListener3[] = new KThread[10];
 		for (int i = 0; i < 10; i++) {
-			tl9[i] = new KThread(new Listener(comm3));
-			tl9[i].setName("Listener Thread" + i).fork();
+			threadsListener3[i] = new KThread(new Listener(comm3));
+			threadsListener3[i].setName("Listener #" + i).fork();
 		}
 
 		KThread.yield();
 
 		for (int i = 0; i < 10; i++) {
-			//ts9[i].join();
-			tl9[i].join();
+			threadsListener3[i].join();
 		}
 
-		System.out.println("VAR4:  Test for more speakers, more listeners, speaker waits for listeners");	
+		
+		System.out.println("** TEST 4:  Test for more speakers, more listeners, speaker waits for listeners");	
 		Communicator comm4 = new Communicator();
 
 		int num  = 10;
-		ArrayList<KThread> t11 = new ArrayList<KThread>();
+		ArrayList<KThread> threads4 = new ArrayList<KThread>();
 
 		for (int i = 0; i < num; i++) {
 			KThread tmp = new KThread(new Speaker(comm4, (i+1)*10));
-			tmp.setName("Speaker Thread" + i);
-
-			t11.add(tmp);
+			tmp.setName("Speaker #" + i);
+			threads4.add(tmp);
 		}
 
 		for (int i = 0; i < num; i++) {
 			KThread tmp = new KThread(new Listener(comm4));
-			tmp.setName("Listener Thread" + i);
-
-			t11.add(tmp);
+			tmp.setName("Listener #" + i);
+			threads4.add(tmp);
 		}
 
-		Collections.shuffle(t11);
+		Collections.shuffle(threads4);
 
 		for (int i = 0; i < num * 2; i++) {
-			t11.get(i).fork();
+			threads4.get(i).fork();
 		}
 
 		KThread.yield();
 
 		for (int i = 0; i < num * 2; i++) {
-			t11.get(i).join();
+			threads4.get(i).join();
 		}
-		System.out.println("Leave Communicator.selfTest");	
-
+		System.out.println("***  Leave Communicator Self Test  ***");	
 	}
-
-
 }

@@ -194,13 +194,13 @@ public class KThread {
 		Machine.interrupt().disable();
 
 		// Added to see if it fix task 1
-		ThreadQueue curJoinQueue = currentThread.joinQ;
+		ThreadQueue currentJoinQ = currentThread.joinQ;
 
-		if (curJoinQueue != null) {
-			KThread thread = curJoinQueue.nextThread();
+		if (currentJoinQ != null) {
+			KThread thread = currentJoinQ.nextThread();
 			while(thread != null) {
 				thread.ready();
-				thread = curJoinQueue.nextThread();
+				thread = currentJoinQ.nextThread();
 			}
 		}
 
@@ -300,15 +300,13 @@ public class KThread {
 		}
 		// Disable Interupts
 		boolean intStatus = Machine.interrupt().disable();
-		if(this != currentThread){
-			// Initalize joinQ
-			if(joinQ == null){
-				joinQ = ThreadedKernel.scheduler.newThreadQueue(true);
-				joinQ.acquire(this);
-			}
-			joinQ.waitForAccess(currentThread);
-			currentThread.sleep();
+		// Initalize joinQ
+		if(joinQ == null){
+			joinQ = ThreadedKernel.scheduler.newThreadQueue(true);
+			joinQ.acquire(this);
 		}
+		joinQ.waitForAccess(currentThread);
+		currentThread.sleep();
 		// RE-enable Interrupts
 		Machine.interrupt().restore(intStatus);
 	}
@@ -422,8 +420,7 @@ public class KThread {
 
 		public void run() {
 			for (int i=0; i<5; i++) {
-				System.out.println("*** thread " + which + " looped "
-						+ i + " times");
+				System.out.println("*** thread " + which + " looped " + i + " times");
 				currentThread.yield();
 			}
 		}
@@ -436,57 +433,57 @@ public class KThread {
 	 */
 	public static void selfTest() {
 		Lib.debug(dbgThread, "Enter KThread.selfTest");
-//
-//		//		new KThread(new PingTest(1)).setName("forked thread").fork();
-//		//		new PingTest(0).run();
-//	
-//
-//		Runnable myRunnable1 =  new Runnable() {
-//
-//			public void run() { 
-//				int i = 0;
-//				while(i < 10) { 
-//					System.out.println("*** in while1 loop " + i + " ***");
-//					i++;
-//				}
-//			}
-//		};
-//
-//		final KThread testThread = new KThread(myRunnable1);
-//		testThread.setName("child 1");
-//
-//		Runnable myrunnable2 = new Runnable() {
-//			public void run() { 
-//				System.out.println("2nd Runnable Before Join");
-//				testThread.join();
-//
-//				int i = 0;
-//				while(i < 10) { 
-//					System.out.println("*** in while2 loop " + i + " ***");
-//					i++;
-//				} 
-//			}
-//		};
-//
-//		KThread t2 = new KThread(myrunnable2);
-//		t2.setName("child 2");
-//
-//		System.out.println("*** testThread.fork ***");
-//		testThread.fork();
-//		
-//		System.out.println("*** t2.fork ***");
-//		t2.fork();
-//		
-//		// Crashes like it should
-//		//currentThread.join();
-//		
-//		System.out.println("*** testThread enter join ***");
-//		testThread.join();
-//		System.out.println("*** testThread leave join ***");
-//		
-//		System.out.println("*** T2 enter join ***");
-//		t2.join();
-//		System.out.println("*** T2 leave join ***");
+
+		//		new KThread(new PingTest(1)).setName("forked thread").fork();
+		//		new PingTest(0).run();
+
+
+		Runnable myRunnable1 =  new Runnable() {
+
+			public void run() { 
+				int i = 0;
+				while(i < 10) { 
+					System.out.println("*** in while1 loop " + i + " ***");
+					i++;
+				}
+			}
+		};
+
+		final KThread testThread = new KThread(myRunnable1);
+		testThread.setName("child 1");
+
+		Runnable myrunnable2 = new Runnable() {
+			public void run() { 
+				System.out.println("2nd Runnable Before Join");
+				testThread.join();
+
+				int i = 0;
+				while(i < 10) { 
+					System.out.println("*** in while2 loop " + i + " ***");
+					i++;
+				} 
+			}
+		};
+
+		KThread t2 = new KThread(myrunnable2);
+		t2.setName("child 2");
+
+		System.out.println("*** testThread.fork ***");
+		testThread.fork();
+
+		System.out.println("*** t2.fork ***");
+		t2.fork();
+
+		// Crashes like it should
+		//currentThread.join();
+
+		System.out.println("*** testThread enter join ***");
+		testThread.join();
+		System.out.println("*** testThread leave join ***");
+
+		System.out.println("*** T2 enter join ***");
+		t2.join();
+		System.out.println("*** T2 leave join ***");
 	}
 
 

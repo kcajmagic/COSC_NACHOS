@@ -22,8 +22,8 @@ public class Alarm {
 
 
 	public Alarm() {
-		// 11 because its the default value of regular Priority Queues
-		waitingQ = new PriorityQueue<KThread>(11, new SortQueueViaPriority());
+		// 250 because thats the maximum possible number of threads
+		waitingQ = new PriorityQueue<KThread>(250, new SortQueueViaPriority());
 
 		Machine.timer().setInterruptHandler(new Runnable() {
 			public void run() { timerInterrupt(); }
@@ -89,13 +89,11 @@ public class Alarm {
 
 
 	public static void selfTest() {
-
-		System.out.print("Enter Alarm.selfTest\n");	
+		System.out.println("***  Enter Alarm Self Test  ***");	
 
 		Runnable rShort = new Runnable() {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " alarm Time: " + Machine.timer().getTime());
-
 				ThreadedKernel.alarm.waitUntil(10);
 				System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (10));	
 
@@ -105,21 +103,20 @@ public class Alarm {
 		Runnable rLong = new Runnable() {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " alarm Time: " + Machine.timer().getTime());
-
 				ThreadedKernel.alarm.waitUntil(200);
 				System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (200));	
 
 			}
 		};
 
-		KThread t[] = new KThread[10];
+		KThread threads[] = new KThread[10];
 		for (int i=0; i<10; i++) {
 			if(i%2==0){
-				t[i] = new KThread(rLong);
+				threads[i] = new KThread(rLong);
 			}else{
-				t[i] = new KThread(rShort);
+				threads[i] = new KThread(rShort);
 			}
-			t[i].setName("Thread" + i).fork();
+			threads[i].setName("Thread #" + i).fork();
 		}
 
 		KThread.yield();
@@ -127,8 +124,7 @@ public class Alarm {
 			ThreadedKernel.alarm.timerInterrupt();
 			KThread.yield();
 		}
-		System.out.print("Leave Alarm.selfTest\n");	
-
+		System.out.println("***  Leave Alarm Self Test  ***");	
 	}
 }
 

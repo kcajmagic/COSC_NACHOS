@@ -98,12 +98,12 @@ public class PriorityScheduler extends Scheduler {
 	}
 
 	public void selfTest(){
-		System.out.println("Entering PriorityScheduler.selftest");
+		System.out.println("*** Entering PriorityScheduler Self Test  ***");
 
 		final Lock lock = new Lock();
 
-		KThread t[] = new KThread[5];
-		KThread two = new KThread(new Runnable() {
+		KThread threads[] = new KThread[5];
+		KThread threadTwo = new KThread(new Runnable() {
 			public void run() {
 				lock.acquire();
 				System.out.println(KThread.currentThread().getName() + " acquired lock");
@@ -114,29 +114,29 @@ public class PriorityScheduler extends Scheduler {
 			}
 		});
 		boolean intStatus = Machine.interrupt().disable();
-		setPriority(two,1);
+		setPriority(threadTwo,1);
 		Machine.interrupt().restore(intStatus);
-		two.setName("Thread two").fork();
+		threadTwo.setName("Thread Two").fork();
 		KThread.yield();
 		for (int i=0; i<5; i++) {
-				t[i] = new KThread(new Runnable() {
-					public void run() {
-						System.out.println("Before lock " + KThread.currentThread().getName());
-						lock.acquire();
-						System.out.println(KThread.currentThread().getName() + " acquired lock");	
-						KThread.yield();
-						lock.release();
-						System.out.println(KThread.currentThread().getName() + " released lock");	
+			threads[i] = new KThread(new Runnable() {
+				public void run() {
+					System.out.println(KThread.currentThread().getName() + " before lock acquired");
+					lock.acquire();
+					System.out.println(KThread.currentThread().getName() + " after acquired lock");	
+					KThread.yield();
+					lock.release();
+					System.out.println(KThread.currentThread().getName() + " released lock");	
 
-					}
-				});
+				}
+			});
 			intStatus = Machine.interrupt().disable();
-			setPriority(t[i],i+3);
+			setPriority(threads[i],i+3);
 			Machine.interrupt().restore(intStatus);
-			t[i].setName("Thread" + i + " with a priority of " + (i+3)).fork();
+			threads[i].setName("Thread #" + i + " Priority: " + (i+3)).fork();
 		}
 		KThread.yield();
-		System.out.println("Leaving PriorityScheduler.selfTest");
+		System.out.println("***  Leaving PriorityScheduler Self Test  ***");
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class PriorityScheduler extends Scheduler {
 			Lib.assertTrue(Machine.interrupt().disabled());
 			ThreadState state = getThreadState(thread);
 			if(this.owner != null && this.transferPriority){
-				this.owner.myResource.remove(this);
+				this.owner.resources.remove(this);
 			}
 			this.owner = state;
 			state.acquire(this);
@@ -200,7 +200,7 @@ public class PriorityScheduler extends Scheduler {
 			}
 
 			if(this.owner != null && this.transferPriority){
-				this.owner.myResource.remove(this);
+				this.owner.resources.remove(this);
 			}
 
 			KThread firstThread = pickNextThread();
@@ -234,7 +234,7 @@ public class PriorityScheduler extends Scheduler {
 
 		public int getEffectivePriority(){
 
-			if(transferPriority == false){
+			if(!transferPriority){
 				return priorityMinimum;
 			}
 			if(altered){
@@ -252,7 +252,7 @@ public class PriorityScheduler extends Scheduler {
 		}
 
 		public void setAltered(){
-			if(transferPriority == false){
+			if(!transferPriority){
 				return;
 			}
 			altered = true;
@@ -282,7 +282,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	protected class ThreadState {
 		protected int effectivePriority;
-		protected LinkedList<ThreadQueue> myResource = new LinkedList<ThreadQueue>();
+		protected LinkedList<ThreadQueue> resources = new LinkedList<ThreadQueue>();
 		private boolean altered = false;
 		protected ThreadQueue waitingQ;
 
@@ -294,7 +294,6 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		public ThreadState(KThread thread) {
 			this.thread = thread;
-
 			setPriority(priorityDefault);
 		}
 
@@ -315,7 +314,7 @@ public class PriorityScheduler extends Scheduler {
 		public int getEffectivePriority() {
 			int effectivePriority = this.priority;
 			if(altered){
-				for(Iterator<ThreadQueue> iter = myResource.iterator(); iter.hasNext();){
+				for(Iterator<ThreadQueue> iter = resources.iterator(); iter.hasNext();){
 					PriorityQueue priorityQ = (PriorityQueue) (iter.next());
 					int priority = priorityQ.getEffectivePriority();
 					if(effectivePriority < priority){
@@ -370,8 +369,8 @@ public class PriorityScheduler extends Scheduler {
 			waitQueue.waitQ.add(thread);
 			waitQueue.setAltered();
 			waitingQ = waitQueue;
-			if (myResource.indexOf(waitQueue) != -1) {
-				myResource.remove(waitQueue);
+			if (resources.indexOf(waitQueue) != -1) {
+				resources.remove(waitQueue);
 				waitQueue.owner = null;
 			}
 		}
@@ -389,7 +388,7 @@ public class PriorityScheduler extends Scheduler {
 		public void acquire(PriorityQueue waitQueue) {
 			Lib.assertTrue(Machine.interrupt().disabled());
 
-			myResource.add(waitQueue);
+			resources.add(waitQueue);
 			if (waitQueue == waitingQ) {
 				waitingQ = null;
 			}

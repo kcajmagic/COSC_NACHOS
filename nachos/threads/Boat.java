@@ -18,14 +18,21 @@ public class Boat
 	{
 		BoatGrader b = new BoatGrader();
 
-		//		System.out.println("\n ***Testing Boats with only 2 children***");
-		//		begin(0, 2, b);
-
-		//	System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
-		//  	begin(1, 2, b);
-
-		System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
-		begin(12, 3, b);
+//		// Expected Results: YAY
+//		System.out.println("\n ***Testing Boats with only 2 children***");
+//		begin(0, 2, b);
+//
+//		// Expected Results: YAY
+//		System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
+//		begin(1, 2, b);
+//
+//		// Expected Results: YAY
+//		System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
+//		begin(3, 3, b);
+//				
+		// Expected Results: YAY
+		System.out.println("\n ***Testing Boats with 50 children, 150 adults***");
+		begin(150, 50, b);
 	}
 
 	public static void begin( int adults, int children, BoatGrader b )
@@ -43,6 +50,7 @@ public class Boat
 		sleepingAdultsOahu = new Condition2(boatLock);
 		sleepingKidsMolokai = new Condition2(boatLock);
 		sleepingKidsOahu = new Condition2(boatLock);
+		
 		KThread threadR = null;
 		for(int i = 0; i < children; i++){
 			KThread thread = new KThread(new Runnable(){
@@ -52,7 +60,7 @@ public class Boat
 			});
 			thread.setName("Child #"+ i);
 			thread.fork();
-			
+
 			if(i==0){
 				threadR = thread;
 			}
@@ -73,16 +81,6 @@ public class Boat
 		Machine.interrupt().restore(intStatus);
 		KThread.yield();
 		System.out.println("Finished the Boad Trip to Molokai");
-
-		//		Runnable r = new Runnable() {
-		//			public void run() {
-		//				SampleItinerary();
-		//			}
-		//		};
-		//		KThread t = new KThread(r);
-		//		t.setName("Sample Boat Thread");
-		//		t.fork();
-
 	}
 
 	static void AdultItinerary()
@@ -97,27 +95,12 @@ public class Boat
 	   indicates that an adult has rowed the boat across to Molokai
 		 */
 
-		//		if(!allThreadsIncd){
-		//			totalAdults++;
-		//			adultsOnOahu++;
-		//			boatLock.acquire();
-		//			sleepingAdultsOahu.sleep();
-		//			boatLock.release();
-		//		}
-		//		System.out.println("Threads are incD adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-		//		bg.AdultRowToMolokai();
-		//		adultsOnOahu--;
-		//		boatLock.acquire();
-		//		sleepingKidsMolokai.wake();
-		//		boatLock.release();
-
 		adultsOnOahu++;
 		boatLock.acquire();
 		sleepingAdultsOahu.sleep();
 		bg.AdultRowToMolokai();
 		adultsOnOahu--;
 		System.out.println("Adult row to Molokai, woke kid: kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
-		System.out.println("waitQ Sleeping kids molokai size "+ sleepingKidsOahu.waitQ.size());
 		sleepingKidsMolokai.wake();
 		boatLock.release();
 	}
@@ -133,7 +116,6 @@ public class Boat
 		KThread.yield();
 		if(awakeKidsOahu > 2){
 			awakeKidsOahu--;
-			System.out.println("Going to sleep kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 			boatLock.acquire();
 			sleepingKidsOahu.sleep();
 			boatLock.release();
@@ -167,23 +149,17 @@ public class Boat
 				awakeKidsOahu++;
 				System.out.println("Child Row to Oaho kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				if(kidsOnOahu > 1){
-					System.out.println("waitQ kids on Oahu size "+ sleepingKidsOahu.waitQ.size());
 					sleepingKidsOahu.wake();
-					System.out.println("waitQ wake up sleeping kid size "+ sleepingKidsOahu.waitQ.size());
 					awakeKidsOahu++;
-					System.out.println("Woke kid kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				} else {
-					System.out.println("waitQ Sleeping Adults size "+ sleepingAdultsOahu.waitQ.size());
 					sleepingAdultsOahu.wake();
-					System.out.println("waitQ waking up sleeping adult size "+ sleepingKidsOahu.waitQ.size());
 					awakeKidsOahu--;
 					System.out.println("Woke adult, going to sleep kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					sleepingKidsOahu.sleep();
 				}
-			}
+			}	
 			boatLock.release();
 		}
-
 	}
 
 	static void SampleItinerary()

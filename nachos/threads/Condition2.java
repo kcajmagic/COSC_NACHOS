@@ -15,7 +15,7 @@ import nachos.machine.*;
  */
 public class Condition2 {
 	// New variable waitQ
-	public LinkedList<KThread> waitQ;
+	private LinkedList<KThread> waitQ;
 
 	/**
 	 * Allocate a new condition variable.
@@ -66,7 +66,6 @@ public class Condition2 {
 		//Wake thread
 		((KThread) waitQ.removeFirst()).ready();
 		
-		
 		//Enable Interupts
 		Machine.interrupt().restore(intStatus);
 	}
@@ -85,18 +84,16 @@ public class Condition2 {
 	}
 	
 	public static void selfTest() {
-
-		System.out.print("Enter Condition2.selfTest\n");	
+		System.out.println("***  Enter Condition2 Self  Test  ***");	
 
 		final Lock lock = new Lock();
 		final Condition2 condition = new Condition2(lock); 
 
-		KThread t[] = new KThread[10];
+		KThread threads[] = new KThread[10];
 		for (int i=0; i<10; i++) {
-			t[i] = new KThread(new Runnable() {
+			threads[i] = new KThread(new Runnable() {
 				
 				public void run() {
-					
 					lock.acquire();
 
 			        System.out.print(KThread.currentThread().getName() + " acquired lock\n");	
@@ -106,29 +103,28 @@ public class Condition2 {
 
 			        lock.release();
 			        System.out.print(KThread.currentThread().getName() + " released lock \n");	
-					
 				}
 			});
-			t[i].setName("Thread" + i).fork();
+			threads[i].setName("Thread #" + i).fork();
 		}
 		System.out.println("Starting Threads");
 		KThread.yield();
 
 		lock.acquire();
 
-		System.out.print("condition.wake();\n");	
+		System.out.println("Called condition.wake();");	
 		condition.wake();
 		lock.release();
 		KThread.yield();
 		lock.acquire();
 	
-		System.out.print("condition.wakeAll();\n");	
+		System.out.println("Called condition.wakeAll();");	
 		condition.wakeAll();
 
 		lock.release();
 		KThread.yield();
 
-		System.out.print("Leave Condition2.selfTest\n");	
+		System.out.println("***  Leave Condition2 Self Test ***");	
 	}
 
 	private Lock conditionLock;
