@@ -32,7 +32,7 @@ public class KThread {
 	private ThreadQueue joinQ = null; 
 
 	//Used for the Alarm Class Priority Queue
-	public long priority;
+	public long alarmPriority;
 
 
 	/**

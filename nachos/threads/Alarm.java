@@ -45,7 +45,7 @@ public class Alarm {
 		long currentTime = Machine.timer().getTime();
 
 		while(!waitingQ.isEmpty()){
-			if(waitingQ.element().priority <= currentTime){
+			if(waitingQ.element().alarmPriority <= currentTime){
 				// Get the element with the highest priority
 				KThread thread = waitingQ.element();
 				// Remove it from waiting
@@ -77,7 +77,7 @@ public class Alarm {
 		boolean intStatus = Machine.interrupt().disable();
 
 		long priortyTime = Machine.timer().getTime() + x;
-		KThread.currentThread().priority = priortyTime;
+		KThread.currentThread().alarmPriority = priortyTime;
 		waitingQ.add(KThread.currentThread());
 		KThread.sleep();
 
@@ -129,8 +129,8 @@ public class Alarm {
 class SortQueueViaPriority implements Comparator<KThread> {
 	// For Sorting the Priority Queue
 	public int compare(KThread thread1, KThread thread2) {
-		if (thread1.priority == thread2.priority) return 0;
-		return thread1.priority > thread2.priority ? 1 : -1;
+		if (thread1.alarmPriority == thread2.alarmPriority) return 0;
+		return thread1.alarmPriority > thread2.alarmPriority ? 1 : -1;
 	}
 
 

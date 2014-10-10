@@ -155,6 +155,7 @@ public class Boat
 				}
 			} else {
 				if(adultsOnOahu == 0 && kidsOnOahu == 0){
+					System.out.println("Finnsihing TotalKids " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					done = true;
 					return;
 				}
