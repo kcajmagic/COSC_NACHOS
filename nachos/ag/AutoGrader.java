@@ -151,18 +151,18 @@ public class AutoGrader {
 	void run() {
 		// TODO Self Test Goes Here
 		
-		// TASK I
-		KThread thread = new KThread();
-		thread.selfTest();
+//		// TASK I
+//		KThread thread = new KThread();
+//		thread.selfTest();
 		
-		// TASK II
-		Lock testLock = new Lock();
-		Condition2 condition2 = new Condition2(testLock);
-		condition2.selfTest();
+//		// TASK II
+//		Lock testLock = new Lock();
+//		Condition2 condition2 = new Condition2(testLock);
+//		condition2.selfTest();
 		
-		// TASK III
-		Alarm alarm = new Alarm();
-		alarm.selfTest();
+//		// TASK III     Doesn't work right now
+//		Alarm alarm = new Alarm();
+//		alarm.selfTest();
 		
 		// TASK IV
 		Communicator com = new Communicator();

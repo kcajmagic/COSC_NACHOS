@@ -30,7 +30,7 @@ import nachos.machine.*;
 public class KThread {
 	// Variable that will be used
 	private ThreadQueue joinQ = null; 
-	
+
 	//Used for the Alarm Class Priority Queue
 	public long priority;
 
@@ -120,7 +120,7 @@ public class KThread {
 	public String toString() {
 		return (name + " (#" + id + ")");
 	}
-	
+
 	/**
 	 * Deterministically and consistently compare this thread to another
 	 * thread.
@@ -193,8 +193,20 @@ public class KThread {
 
 		Machine.interrupt().disable();
 
+		// Added to see if it fix task 1
+		ThreadQueue curJoinQueue = currentThread.joinQ;
+
+		if (curJoinQueue != null) {
+			KThread thread = curJoinQueue.nextThread();
+			while(thread != null) {
+				thread.ready();
+				thread = curJoinQueue.nextThread();
+			}
+		}
+		
 		Machine.autoGrader().finishingCurrentThread();
 
+		
 		Lib.assertTrue(toBeDestroyed == null);
 		toBeDestroyed = currentThread;
 
@@ -296,7 +308,6 @@ public class KThread {
 			}
 			joinQ.waitForAccess(currentThread);
 			currentThread.sleep();
-
 		}
 		// RE-enable Interrupts
 		Machine.interrupt().restore(intStatus);
@@ -426,10 +437,8 @@ public class KThread {
 	public static void selfTest() {
 		Lib.debug(dbgThread, "Enter KThread.selfTest");
 
-		new KThread(new PingTest(1)).setName("forked thread").fork();
-		new PingTest(0).run();
-		
-		
+//		new KThread(new PingTest(1)).setName("forked thread").fork();
+//		new PingTest(0).run();
 		Runnable myrunnable1 = new Runnable() {
 
 			public void run() { 
@@ -449,7 +458,7 @@ public class KThread {
 
 		Runnable myrunnable2 = new Runnable() {
 			public void run() { 
-				System.out.println("selfTest2::Runnable");
+				System.out.println("2nd Runnable");
 				testThread.join();
 				int i = 0;
 				while(i < 10) { 
@@ -477,7 +486,7 @@ public class KThread {
 		// Add current thread to ready queue, and switch context
 		yield();
 
-		
+
 	}
 
 	private static final char dbgThread = 't';

@@ -41,6 +41,11 @@ public class Boat
 		// Create threads here. See section 3.4 of the Nachos for Java
 		// Walkthrough linked from the projects page.
 		done = false;
+		Lock boatLock  = new Lock();
+		sleepingAdultsOahu = new Condition2(boatLock);
+		sleepingKidsMolokai = new Condition2(boatLock);
+		sleepingKidsOahu = new Condition2(boatLock);
+				
 		for(int i = 0; i < children; i++){
 			KThread thread = new KThread(new Runnable(){
 				public void run(){

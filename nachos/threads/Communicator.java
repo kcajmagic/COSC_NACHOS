@@ -131,16 +131,17 @@ public class Communicator {
 		Communicator comm = new Communicator();
 		KThread threadSpeaker =  new KThread(new Speaker(comm, 100));
 		threadSpeaker.setName("Thread speaker").fork();
-
+		
 		KThread.yield();
-
+		
 		KThread threadListener = new KThread(new Listener(comm));
 		threadListener.setName("Thread listner").fork();
-
+		
 		KThread.yield();
-
+	
 		threadListener.join();
 		threadSpeaker.join();
+		
 
 		System.out.print("\nVAR2: Test for one speaker, one listener, listener waits for speaker\n");	
 		Communicator comm1 = new Communicator();
