@@ -167,13 +167,13 @@ public class AutoGrader {
 //		Communicator comm = new Communicator();
 //		comm.selfTest();
 		
-		// TASK V
-		PriorityScheduler scheduler = new PriorityScheduler();
-		scheduler.selfTest();
+//		// TASK V
+//		PriorityScheduler scheduler = new PriorityScheduler();
+//		scheduler.selfTest();
 				
-//		// TASK VI
-//		Boat boat = new Boat();
-//		boat.selfTest();
+		// TASK VI
+		Boat boat = new Boat();
+		boat.selfTest();
 		
 		kernel.selfTest();
 		kernel.run();
