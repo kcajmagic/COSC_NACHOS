@@ -97,8 +97,9 @@ public class Boat
 			sleepingAdultsOahu.sleep();
 			boatLock.release();
 		}
-		System.out.println("Threads are incD. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+		System.out.println("Threads are incD adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 		bg.AdultRowToMolokai();
+		adultsOnOahu--;
 		boatLock.acquire();
 		sleepingKidsMolokai.wake();
 		boatLock.release();
@@ -115,13 +116,13 @@ public class Boat
 			totalKids++;
 			kidsOnOahu++;
 			awakeKidsOahu++;
-			System.out.println("Threads aren't incD");
+			System.out.println("Threads aren't incD kid");
 		}
 		KThread.yield();
-		System.out.println("Threads are incD. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+		System.out.println("Threads are incD kid. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 		allThreadsIncd = true;
 		if(awakeKidsOahu > 2){
-			System.out.println("There are more than 2 awake kids on Oahu");
+			System.out.println("There are more than 2 awake kids on Oahu so im sleeping");
 			awakeKidsOahu--;
 			boatLock.acquire();
 			sleepingKidsOahu.sleep();
@@ -131,26 +132,21 @@ public class Boat
 		while(!done){
 			if(onOahu){
 				if(awakeKidsOahu == 2){
-					System.out.println("There are " + awakeKidsOahu + " awake kids on Oahu");
+					System.out.println("Before row to mol. There are " + awakeKidsOahu + " awake kids on Oahu");
 					bg.ChildRowToMolokai();
 					onOahu = false;
 					awakeKidsOahu--;
 					kidsOnOahu--;
 					boatLock.acquire();
-					System.out.println("sleeping");
+					System.out.println("sleeping after rowing");
 					sleepingKidsMolokai.sleep();
 					System.out.println("rowing done. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					boatLock.release();
-					if(adultsOnOahu == 0 && kidsOnOahu == 0){
-						done = true;
-						return;
-					}
 				}else if(awakeKidsOahu == 1) {
 					bg.ChildRideToMolokai();
 					onOahu = false;
 					awakeKidsOahu--;
 					kidsOnOahu--;
-					System.out.println("riding done, before acquire. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					boatLock.acquire();
 					sleepingKidsMolokai.wake();
 					sleepingKidsMolokai.sleep();
@@ -158,19 +154,27 @@ public class Boat
 					System.out.println("riding done, after release. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 				}
 			} else {
+				if(adultsOnOahu == 0 && kidsOnOahu == 0){
+					done = true;
+					return;
+				}
 				bg.ChildRowToOahu();
 				onOahu = true;
 				kidsOnOahu++;
 				awakeKidsOahu++;
 				if(kidsOnOahu > 1){
 					boatLock.acquire();
-					sleepingKidsOahu.wake();
-					boatLock.release();
 					awakeKidsOahu++;
-				} else{
+					sleepingKidsOahu.wake();
+					System.out.println("Woke kid on Oahu up. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
+					boatLock.release();
+				} else {
 					boatLock.acquire();
 					sleepingAdultsOahu.wake();
+					System.out.println("woke adult, now sleeping");
+					awakeKidsOahu--;
 					sleepingKidsOahu.sleep();
+					System.out.println("riding to oahu done, after woke adult. totalKids: " + totalKids + ", kidsOnOahu: " + kidsOnOahu + ", awakeKidsOahu: " + awakeKidsOahu + ", adultsOnOahu: " + adultsOnOahu);
 					boatLock.release();
 				}
 			}
