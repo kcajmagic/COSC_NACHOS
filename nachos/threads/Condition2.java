@@ -101,6 +101,7 @@ public class Condition2 {
 
 			        System.out.print(KThread.currentThread().getName() + " acquired lock\n");	
 			        condition.sleep();
+		
 			        System.out.print(KThread.currentThread().getName() + " acquired lock again\n");	
 
 			        lock.release();
@@ -110,23 +111,24 @@ public class Condition2 {
 			});
 			t[i].setName("Thread" + i).fork();
 		}
-
+		System.out.println("Starting Threads");
 		KThread.yield();
 
 		lock.acquire();
 
 		System.out.print("condition.wake();\n");	
 		condition.wake();
-
+		lock.release();
+		KThread.yield();
+		lock.acquire();
+	
 		System.out.print("condition.wakeAll();\n");	
 		condition.wakeAll();
 
 		lock.release();
+		KThread.yield();
 
 		System.out.print("Leave Condition2.selfTest\n");	
-
-		t[9].join();
-
 	}
 
 	private Lock conditionLock;

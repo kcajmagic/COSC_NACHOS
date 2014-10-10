@@ -149,7 +149,6 @@ public class AutoGrader {
 	}
 
 	void run() {
-		// TODO Self Test Goes Here
 		
 //		// TASK I
 //		KThread thread = new KThread();
@@ -160,17 +159,17 @@ public class AutoGrader {
 //		Condition2 condition2 = new Condition2(testLock);
 //		condition2.selfTest();
 		
-//		// TASK III     Doesn't work right now
-//		Alarm alarm = new Alarm();
-//		alarm.selfTest();
+		// TASK III     
+		Alarm alarm = new Alarm();
+		alarm.selfTest();
 		
 //		// TASK IV
 //		Communicator com = new Communicator();
 //		com.selfTest();
 		
-		// TASK V
-		PriorityScheduler scheduler = new PriorityScheduler();
-		scheduler.selfTest();
+//		// TASK V
+//		PriorityScheduler scheduler = new PriorityScheduler();
+//		scheduler.selfTest();
 				
 //		// TASK VI
 //		Boat boat = new Boat();

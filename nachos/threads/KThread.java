@@ -203,10 +203,10 @@ public class KThread {
 				thread = curJoinQueue.nextThread();
 			}
 		}
-		
+
 		Machine.autoGrader().finishingCurrentThread();
 
-		
+
 		Lib.assertTrue(toBeDestroyed == null);
 		toBeDestroyed = currentThread;
 
@@ -435,59 +435,61 @@ public class KThread {
 	 * Tests whether this module is working.
 	 */
 	public static void selfTest() {
-//		Lib.debug(dbgThread, "Enter KThread.selfTest");
+		Lib.debug(dbgThread, "Enter KThread.selfTest");
 //
-////		new KThread(new PingTest(1)).setName("forked thread").fork();
-////		new PingTest(0).run();
-//		Runnable myrunnable1 = new Runnable() {
+//		//		new KThread(new PingTest(1)).setName("forked thread").fork();
+//		//		new PingTest(0).run();
+//	
+//
+//		Runnable myRunnable1 =  new Runnable() {
 //
 //			public void run() { 
 //				int i = 0;
 //				while(i < 10) { 
-//					//System.out.println("*** in while1 loop " + i + " ***");
+//					System.out.println("*** in while1 loop " + i + " ***");
 //					i++;
-//				} /*yield();*/ 
+//				}
 //			}
 //		};
 //
-//		final KThread testThread = new KThread(myrunnable1);
+//		final KThread testThread = new KThread(myRunnable1);
 //		testThread.setName("child 1");
-//
-//
-//		// t1.join();
 //
 //		Runnable myrunnable2 = new Runnable() {
 //			public void run() { 
-//				//System.out.println("2nd Runnable");
+//				System.out.println("2nd Runnable Before Join");
 //				testThread.join();
+//
 //				int i = 0;
 //				while(i < 10) { 
-//					//System.out.println("*** in while2 loop " + i + " ***");
+//					System.out.println("*** in while2 loop " + i + " ***");
 //					i++;
-//				} /*yield();*/ 
+//				} 
 //			}
 //		};
 //
 //		KThread t2 = new KThread(myrunnable2);
 //		t2.setName("child 2");
 //
-//		//System.out.println("*** t2.fork ***");
-//		t2.fork();
-//
-//		//System.out.println("*** t1.fork ***");
+//		System.out.println("*** testThread.fork ***");
 //		testThread.fork();
-//
-//
-//		//System.out.println("*** T2 enter join ***");
+//		
+//		System.out.println("*** t2.fork ***");
+//		t2.fork();
+//		
+//		// Crashes like it should
+//		//currentThread.join();
+//		
+//		System.out.println("*** testThread enter join ***");
+//		testThread.join();
+//		System.out.println("*** testThread leave join ***");
+//		
+//		System.out.println("*** T2 enter join ***");
 //		t2.join();
-//		//System.out.println("*** T2 leave join ***");
-//		// t2.join();
-//
-//		// Add current thread to ready queue, and switch context
-//		yield();
-
-
+//		System.out.println("*** T2 leave join ***");
 	}
+
+
 
 	private static final char dbgThread = 't';
 
