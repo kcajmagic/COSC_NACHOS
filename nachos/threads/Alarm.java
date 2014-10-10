@@ -51,7 +51,9 @@ public class Alarm {
 				// Remove it from waiting
 				waitingQ.remove(thread);
 				// Make it ready
+				boolean intStatus = Machine.interrupt().disable();
 				thread.ready();
+				Machine.interrupt().restore(intStatus);
 			}else{
 				return;
 			}
@@ -94,8 +96,8 @@ public class Alarm {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " alarm Time: " + Machine.timer().getTime());
 			
-		        ThreadedKernel.alarm.waitUntil(10);
-		        System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (10));	
+		        ThreadedKernel.alarm.waitUntil(100);
+		        System.out.println(KThread.currentThread().getName() + " woken up Time: " + Machine.timer().getTime() + " Should wait: "+ (100));	
 				
 			}
 		};
@@ -106,6 +108,9 @@ public class Alarm {
 			t[i].setName("Thread" + i).fork();
 		}
 	
+		KThread.yield();
+		
+		ThreadedKernel.alarm.timerInterrupt();
 		KThread.yield();
 		System.out.print("Leave Alarm.selfTest\n");	
 
