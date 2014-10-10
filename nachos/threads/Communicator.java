@@ -95,8 +95,7 @@ public class Communicator {
 		}
 
 		public void run() {
-			 System.out.println(KThread.currentThread().getName() 
-			        + " will speak " + this.word);	
+			System.out.println(KThread.currentThread().getName() + " will speak ");	
 			comm.speak(this.word);
 			System.out.println(KThread.currentThread().getName() + " spoke word " + this.word);
 		}
@@ -111,12 +110,11 @@ public class Communicator {
 		}
 
 		public void run() {
-			 System.out.println(KThread.currentThread().getName() 
-			          + " will listen ");	
+			System.out.println(KThread.currentThread().getName() + " will listen ");	
 
 			int word = comm.listen();
 
-			 System.out.println(KThread.currentThread().getName()  + " Listened to word: " + word + " "); 
+			System.out.println(KThread.currentThread().getName()  + " Listened to word: " + word + " "); 
 		}
 
 		private Communicator comm; 
@@ -132,17 +130,17 @@ public class Communicator {
 		Communicator comm1 = new Communicator();
 		KThread threadSpeaker =  new KThread(new Speaker(comm1, 100));
 		threadSpeaker.setName("Thread speaker").fork();
-		
+
 		KThread.yield();
-		
+
 		KThread threadListener = new KThread(new Listener(comm1));
 		threadListener.setName("Thread listner").fork();
-		
+
 		KThread.yield();
-	
+
 		threadListener.join();
 		threadSpeaker.join();
-		
+
 
 		System.out.println("VAR2: Test for one speaker, one listener, listener waits for speaker");	
 		Communicator comm2 = new Communicator();
