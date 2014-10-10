@@ -64,7 +64,8 @@ public class Condition2 {
 		boolean intStatus = Machine.interrupt().disable();
 		
 		//Wake thread
-		((KThread)waitQ.removeFirst()).ready();
+		((KThread) waitQ.removeFirst()).ready();
+		
 		
 		//Enable Interupts
 		Machine.interrupt().restore(intStatus);

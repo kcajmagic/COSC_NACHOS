@@ -164,18 +164,15 @@ public class AutoGrader {
 //		Alarm alarm = new Alarm();
 //		alarm.selfTest();
 		
-		// TASK IV
-		Communicator com = new Communicator();
-		com.selfTest();
-		
-		
-		
+//		// TASK IV
+//		Communicator com = new Communicator();
+//		com.selfTest();
+				
 		// TASK VI
 		Boat boat = new Boat();
 		boat.selfTest();
 		
-		
-		
+			
 		kernel.selfTest();
 		kernel.run();
 		kernel.terminate();
