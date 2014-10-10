@@ -18,19 +18,15 @@ public class Boat
 	{
 		BoatGrader b = new BoatGrader();
 
-//		// Expected Results: YAY
 //		System.out.println("\n ***Testing Boats with only 2 children***");
 //		begin(0, 2, b);
 //
-//		// Expected Results: YAY
 //		System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
 //		begin(1, 2, b);
 //
-//		// Expected Results: YAY
 //		System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
 //		begin(3, 3, b);
 //				
-		// Expected Results: YAY
 		System.out.println("\n ***Testing Boats with 50 children, 150 adults***");
 		begin(150, 50, b);
 	}
@@ -77,7 +73,7 @@ public class Boat
 
 		System.out.println("Starting the Boat Trip to Molokai");
 		boolean intStatus = Machine.interrupt().disable();
-		ThreadedKernel.scheduler.setPriority(KThread.currentThread(), 0);
+		ThreadedKernel.scheduler.decreasePriority();
 		Machine.interrupt().restore(intStatus);
 		KThread.yield();
 		System.out.println("Finished the Boad Trip to Molokai");

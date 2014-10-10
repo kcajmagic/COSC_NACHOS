@@ -116,7 +116,7 @@ public class PriorityScheduler extends Scheduler {
 		boolean intStatus = Machine.interrupt().disable();
 		setPriority(threadTwo,1);
 		Machine.interrupt().restore(intStatus);
-		threadTwo.setName("Thread Two").fork();
+		threadTwo.setName("Thread Two Priority: 2").fork();
 		KThread.yield();
 		for (int i=0; i<5; i++) {
 			threads[i] = new KThread(new Runnable() {
@@ -347,6 +347,25 @@ public class PriorityScheduler extends Scheduler {
 			PriorityQueue priorityQ = (PriorityQueue) waitingQ;
 			if(priorityQ != null){
 				priorityQ.setAltered();
+			}
+		}
+		
+		public void increasePriority(){
+			if(this.priority == priorityMinimum){
+				return;
+			}else{
+				this.priority--;
+				setAltered();
+			}
+			
+		}
+		
+		public void decreasePriority(){
+			if(this.priority == priorityMaximum){
+				return;
+			}else{
+				this.priority++;
+				setAltered();
 			}
 		}
 
