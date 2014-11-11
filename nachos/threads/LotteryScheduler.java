@@ -1,7 +1,9 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import nachos.threads.PriorityScheduler.PriorityQueue;
 
+import java.awt.datatransfer.Transferable;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +44,77 @@ public class LotteryScheduler extends PriorityScheduler {
 	 * @return	a new lottery thread queue.
 	 */
 	public ThreadQueue newThreadQueue(boolean transferPriority) {
-		// implement me
-		return null;
+		return new LotteryPriorityQueue(transferPriority);
+	}
+
+	protected class LotteryPriorityQueue extends PriorityQueue{
+
+		LotteryPriorityQueue(boolean transferPriority) {
+			super(transferPriority);
+			// TODO Auto-generated constructor stub
+		}
+		
+
+		protected KThread pickNextThread() {
+			KThread nextThread = null;
+			int tickets[] = new int[250];
+			KThread threads[] = new KThread[250];
+			int count = 0;
+			int sum = 0;
+			for(Iterator<KThread> iter = waitQ.iterator(); iter.hasNext();){
+				KThread thread = iter.next();
+				tickets[count] = getThreadState(thread).getEffectivePriority();
+				sum += getThreadState(thread).getEffectivePriority();
+			}
+			int r = (int)(Math.random()*sum)+1;
+			for(int i: tickets){
+				if(r <= tickets[i]){
+					return threads[i];
+				}else {
+					r -= tickets[i];
+				}
+			}
+			return super.pickNextThread(); // TO Fix error of not returning anything
+		}
+
+		public int getEffectivePriority() {
+			if(transferPriority == false){
+				return priorityMinimum;
+			}
+			if(altered){
+				effectivePriority = priorityMinimum;
+				for(Iterator<KThread> iter = waitQ.iterator(); iter.hasNext();){
+					KThread thread = iter.next();
+					effectivePriority += getThreadState(thread).getEffectivePriority();
+				}
+				altered = false;
+			}
+			return effectivePriority;
+		}
+
+	}
+
+	protected class LotteryState extends ThreadState{
+
+		public LotteryState(KThread thread) {
+			super(thread);
+			// TODO Auto-generated constructor stub
+		}
+		
+		public int getEffectivePriority() {
+			// TODO: Update this method
+			int effectivePriority = this.priority;
+			if(altered){
+				for(Iterator<ThreadQueue> iter = resources.iterator(); iter.hasNext();){
+					PriorityQueue priorityQ = (PriorityQueue) (iter.next());
+					int priority = priorityQ.getEffectivePriority();
+					if(effectivePriority < priority){
+						effectivePriority = priority;
+					}
+				}
+			}
+			return effectivePriority;
+		}
+
 	}
 }
