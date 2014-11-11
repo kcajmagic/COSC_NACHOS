@@ -26,16 +26,19 @@ import jdk.nashorn.internal.runtime.FindProperty;
  * @see	nachos.network.NetProcess
  */
 public class UserProcess {
-	
+
 	public static final int MAX_STRING_LENGTH = 256;
 	public static final int MAX_OPEN_FILES = 16;
+	public static final int ROOT = 1;
 	private int processID;
 	private int parentProcessID;
+	private UThread thread; 
+	private int exitStatus;
 	private LinkedList<Integer> children = new LinkedList<Integer>(); 
-	
-	
+
+
 	private FileDescriptor fileDescriptors[] = new FileDescriptor[MAX_OPEN_FILES];
-	
+
 	/**
 	 * Allocate a new process.
 	 */
@@ -149,10 +152,10 @@ public class UserProcess {
 		Lib.assertTrue(offset >= 0 && length >= 0 && offset+length <= data.length);
 
 		byte[] memory = Machine.processor().getMemory();
-		
+
 		int virtualPageNumber = Machine.processor().pageFromAddress(vaddr);
 		int addressOffset = Machine.processor().offsetFromAddress(vaddr);
-		
+
 		TranslationEntry entry = null;
 		entry = pageTable[virtualPageNumber];
 		entry.used = true;
@@ -202,22 +205,22 @@ public class UserProcess {
 
 		int virtualPageNumber = Machine.processor().pageFromAddress(vaddr);
 		int addressOffset = Machine.processor().offsetFromAddress(vaddr);
-		
+
 		TranslationEntry entry = null;
 		entry = pageTable[virtualPageNumber];
 		entry.used = true;
 		entry.dirty = true;
 		int physicalPageNumber = entry.ppn;
 		int pageAddress = (physicalPageNumber*pageSize) + addressOffset;
-		
+
 		if(entry.readOnly){
 			return 0;
 		}
-		
+
 		if(physicalPageNumber < 0 || physicalPageNumber >= Machine.processor().getNumPhysPages()){
 			return 0;
 		}
-		
+
 		int amount = Math.min(length, memory.length-vaddr);
 		System.arraycopy(data, offset, memory, vaddr, amount);
 
@@ -335,7 +338,7 @@ public class UserProcess {
 
 			for (int i=0; i<section.getLength(); i++) {
 				int vpn = section.getFirstVPN()+i;
-				
+
 				TranslationEntry entry = pageTable[vpn];
 				entry.readOnly = section.isReadOnly();
 				int physicalPageNumber = entry.ppn;
@@ -394,16 +397,16 @@ public class UserProcess {
 		}
 		return -1;
 	}
-	
-	  private int findFileDescriptorByName(String filename) { 
-	        for (int i = 0; i < MAX_OPEN_FILES; i++) {                 
-	            if (fileDescriptors[i].filename == filename)                
-	                return i;                                
-	        }                                             
 
-	        return -1;                           
-	    }    
-	
+	private int findFileDescriptorByName(String filename) { 
+		for (int i = 0; i < MAX_OPEN_FILES; i++) {                 
+			if (fileDescriptors[i].filename == filename)                
+				return i;                                
+		}                                             
+
+		return -1;                           
+	}    
+
 	private int create(int fileAddress){
 		String fileName = readVirtualMemoryString(fileAddress, MAX_STRING_LENGTH);
 		OpenFile file = UserKernel.fileSystem.open(fileName, true);
@@ -421,11 +424,11 @@ public class UserProcess {
 			}
 		}
 	}
-	
+
 	private int open(int fileAddress){
 		String fileName = readVirtualMemoryString(fileAddress, MAX_STRING_LENGTH);
 		OpenFile file = UserKernel.fileSystem.open(fileName, false);
-		
+
 		if(file == null){
 			return -1;
 		} else {
@@ -439,18 +442,18 @@ public class UserProcess {
 				return fileHandle;
 			}
 		}
-		
+
 	}
-	
+
 	private int read(int fileAddress, int bufferAddress, int bufferSize){
 		if(fileAddress < 0  || fileAddress > MAX_OPEN_FILES || fileDescriptors[fileAddress].file == null){
 			return -1;
 		}
-		
+
 		FileDescriptor fileDescriptor = fileDescriptors[fileAddress];
 		byte[] buffer = new byte[bufferSize];
-		
-		int bytesRead = fileDescriptor.file.read(fileDescriptor, buffer, 0, bufferSize);
+
+		int bytesRead = fileDescriptor.file.read(fileDescriptor.position, buffer, 0, bufferSize);
 		if (bytesRead < 0){
 			return -1;
 		} else{
@@ -459,37 +462,37 @@ public class UserProcess {
 			return bytesRead;
 		}
 	}
-	
+
 	private int close(int fileAddress){
 		if(fileAddress < 0 || fileAddress >= MAX_OPEN_FILES){
 			return -1;
 		}
-		
+
 		boolean noErrors = true;
-		
+
 		FileDescriptor fileDescriptor = fileDescriptors[fileAddress];
 		fileDescriptor.position = 0;
-		fileDescriptor.close();
+		fileDescriptor.file.close();
 		if(fileDescriptor.toRemove){
 			noErrors = UserKernel.fileSystem.remove(fileDescriptor.filename);
 			fileDescriptor.toRemove = false;
 		}
-		
+
 		fileDescriptor.filename = "";
-		
+
 		if(!noErrors){
 			return -1;
 		} else{
 			return 0;
 		}
-		
+
 	}
-	
+
 	private int unlink(int fileAddress){
 		boolean noError = true;
 		String fileName = readVirtualMemoryString(fileAddress, MAX_STRING_LENGTH);
 		int fileHandle = findFileDescriptorByName(fileName);
-		
+
 		if(fileHandle < 0){
 			noError = UserKernel.fileSystem.remove(fileDescriptors[fileHandle].filename);
 		} else {
@@ -501,7 +504,7 @@ public class UserProcess {
 			return 0;
 		}
 	}
-	
+
 	public int exec(int file, int argc, int argv){
 		if (argc < 1){
 			return -1;
@@ -510,13 +513,13 @@ public class UserProcess {
 		if(fileName == null){
 			return -1;
 		}
-		
+
 		String suffix = fileName.substring(fileName.length()-4, fileName.length());
 		if(suffix.equals(".coff")){
 			return -1;
 		}
-		
-		
+
+
 		String arguments[] = new String[argc];
 		byte temp[] = new byte[4];
 		for(int index = 0; index < argc; index++){
@@ -526,9 +529,9 @@ public class UserProcess {
 			}
 			int arugmentAddress = Lib.bytesToInt(temp, 0);
 			arguments[index] = readVirtualMemoryString(arugmentAddress, MAX_STRING_LENGTH);
-					
+
 		}
-		
+
 		UserProcess childProcess = UserProcess.newUserProcess();
 		childProcess.parentProcessID = this.processID;
 		if(childProcess.execute(fileName, arguments)){
@@ -554,17 +557,40 @@ public class UserProcess {
 			return -1;
 		}
 		//TODO create getProcessByID() Method
-		UserProcess childProcess = UserKernel.getProcessByID(processID);
-		
+		UserProcess childProccess = UserKernel.getProcessByID(processID);
+
 		if(childProccess == null){
 			return -2;
 		}
-		
-		childProcess.thread.join();
+
+		childProccess.thread.join();
 		UserKernel.unregisterProcess(processID);
-		return childProcess.exitStatus;
+		return childProccess.exitStatus;
 	}
-	
+
+	private void exit(int status){
+
+		for (int index = 0; index < MAX_OPEN_FILES; index++) {                       
+			if (fileDescriptors[index].file != null)                                
+				close(index);                              
+		}  
+
+		while (children != null && !children.isEmpty())  {               
+			int childPid = children.removeFirst();                       
+			UserProcess childProcess = UserKernel.getProcessByID(childPid);
+			childProcess.parentProcessID = ROOT;                                   
+		}    
+
+		unloadSections();
+
+		if (processID == ROOT) {            
+			Kernel.kernel.terminate();           
+		} else {                                                      
+			KThread.currentThread().finish();                            
+		}   
+
+	}
+
 	private static final int
 	syscallHalt = 0,
 	syscallExit = 1,
@@ -610,7 +636,8 @@ public class UserProcess {
 		case syscallHalt:
 			return handleHalt();
 		case syscallExit:
-			return exit(a0);
+			exit(a0);
+			return 0;
 		case syscallExec:
 			return exec(a0, a1, a2);
 		case syscallJoin:
@@ -622,9 +649,10 @@ public class UserProcess {
 		case syscallRead:
 			return read(a0, a1, a2);
 		case syscallWrite:
-			return write(a0, a1, a2);
+			//TODO: No Idea what is supposed to go here
+			return writeVirtualMemory(a0, null, a2, a3);
 		case syscallClose:
-			 return close(a1);
+			return close(a1);
 		case syscallUnlink:
 			return unlink(a0);
 		default:
@@ -680,4 +708,17 @@ public class UserProcess {
 
 	private static final int pageSize = Processor.pageSize;
 	private static final char dbgProcess = 'a';
+
+
+
+	public class FileDescriptor {                            
+
+		private  String   filename = "";   // opened file name    
+		private  OpenFile file = null;     // opened file object
+		private  int      position = 0;    // IO position  
+
+		private  boolean  toRemove = false;// if need to remove  
+		// this file           
+
+	} 
 }

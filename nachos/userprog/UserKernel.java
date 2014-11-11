@@ -1,5 +1,6 @@
 package nachos.userprog;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import nachos.machine.*;
@@ -11,7 +12,9 @@ import nachos.userprog.*;
  */
 public class UserKernel extends ThreadedKernel {
 	
-	private static LinkedList<Integer> pageTable = new LinkedList<Integer>();  
+	private static LinkedList<Integer> pageTable = new LinkedList<Integer>(); 
+   
+    private static HashMap<Integer, UserProcess>mapOfProcesses = new HashMap<Integer, UserProcess>();
 	
 	/**
 	 * Allocate a new user kernel.
@@ -134,6 +137,41 @@ public class UserKernel extends ThreadedKernel {
 		pageTable.add(pageNumber);
 		Machine.interrupt().enable();
 	}
+	
+	
+	   /**
+     * get process from process map by pid
+     */
+    public static UserProcess getProcessByID(int pid) {
+        return mapOfProcesses.get(pid);
+    }
+    
+    
+    /**
+     * register a process to the map in Kernel 
+     */
+    public static UserProcess registerProcess(int processID, UserProcess process) {  
+        UserProcess insertedProcess;                           
+        Machine.interrupt().disable();                             
+        insertedProcess = mapOfProcesses.put(processID, process);          
+        Machine.interrupt().enabled();                    
+        return insertedProcess;                   
+    }  
+    
+	  /**
+     * unregister a process in the process map 
+     */
+    public static UserProcess unregisterProcess(int processID) {       
+        UserProcess deletedProcess;                               
+        Machine.interrupt().disable();                             
+
+        deletedProcess = mapOfProcesses.remove(processID);                   
+
+        Machine.interrupt().enabled();                          
+
+        return deletedProcess;                                 
+    }   
+	
 	
 	/** Globally accessible reference to the synchronized console. */
 	public static SynchConsole console;
