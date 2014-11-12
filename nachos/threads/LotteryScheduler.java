@@ -34,6 +34,15 @@ public class LotteryScheduler extends PriorityScheduler {
 	 */
 	public LotteryScheduler() {
 	}
+	
+	/**
+	 * The minimum priority that a thread can have. Do not change this value.
+	 */
+	public static final int priorityMinimum = 1;
+	/**
+	 * The maximum priority that a thread can have. Do not change this value.
+	 */
+	public static final int priorityMaximum = Integer.MAX_VALUE; 
 
 	/**
 	 * Allocate a new lottery thread queue.
@@ -56,25 +65,25 @@ public class LotteryScheduler extends PriorityScheduler {
 		
 
 		protected KThread pickNextThread() {
-			KThread nextThread = null;
 			int tickets[] = new int[250];
 			KThread threads[] = new KThread[250];
 			int count = 0;
 			int sum = 0;
-			for(Iterator<KThread> iter = waitQ.iterator(); iter.hasNext();){
+			for(Iterator<KThread> iter = waitQ.iterator(); iter.hasNext();count++){
 				KThread thread = iter.next();
 				tickets[count] = getThreadState(thread).getEffectivePriority();
 				sum += getThreadState(thread).getEffectivePriority();
+				threads[count] = thread;
 			}
 			int r = (int)(Math.random()*sum)+1;
-			for(int i: tickets){
+			for(int i=0; i < tickets.length; i++){
 				if(r <= tickets[i]){
 					return threads[i];
-				}else {
+				} else {
 					r -= tickets[i];
 				}
 			}
-			return super.pickNextThread(); // TO Fix error of not returning anything
+			return null; // TO Fix error of not returning anything
 		}
 
 		public int getEffectivePriority() {
@@ -106,11 +115,8 @@ public class LotteryScheduler extends PriorityScheduler {
 			int effectivePriority = this.priority;
 			if(altered){
 				for(Iterator<ThreadQueue> iter = resources.iterator(); iter.hasNext();){
-					PriorityQueue priorityQ = (PriorityQueue) (iter.next());
-					int priority = priorityQ.getEffectivePriority();
-					if(effectivePriority < priority){
-						effectivePriority = priority;
-					}
+					LotteryPriorityQueue priorityQ = (LotteryPriorityQueue) (iter.next());
+					effectivePriority += priorityQ.getEffectivePriority();
 				}
 			}
 			return effectivePriority;

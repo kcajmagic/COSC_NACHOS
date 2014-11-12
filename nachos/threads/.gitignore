@@ -38,3 +38,5 @@
 /PriorityScheduler$1.class
 /PriorityScheduler$2.class
 /Alarm$3.class
+/LotteryScheduler$LotteryPriorityQueue.class
+/LotteryScheduler$LotteryState.class
