@@ -443,12 +443,12 @@ public class UserProcess {
 
 	}
 
-	private int read(int fileAddress, int bufferAddress, int bufferSize){
-		if(fileAddress < 0  || fileAddress > MAX_OPEN_FILES || fileDescriptors[fileAddress].file == null){
+	private int read(int fileHandler, int bufferAddress, int bufferSize){
+		if(fileHandler < 0  || fileHandler > MAX_OPEN_FILES || fileDescriptors[fileHandler].file == null){
 			return -1;
 		}
 
-		FileDescriptor fileDescriptor = fileDescriptors[fileAddress];
+		FileDescriptor fileDescriptor = fileDescriptors[fileHandler];
 		byte[] buffer = new byte[bufferSize];
 
 		int bytesRead = fileDescriptor.file.read(fileDescriptor.position, buffer, 0, bufferSize);
@@ -459,6 +459,29 @@ public class UserProcess {
 			fileDescriptor.position += positionMoved;
 			return bytesRead;
 		}
+	}
+
+	private int write(int fileHandler, int bufferAddress, int bufferSize) {
+
+		if (fileHandler < 0 || fileHandler > MAX_OPEN_FILES || fileDescriptors[fileHandler].file == null)                         
+			return -1;                                                
+
+		FileDescriptor fileDescriptor = fileDescriptors[fileHandler];                                  
+
+		byte[] buf = new byte[bufferSize];                                   
+
+		int bytesRead = readVirtualMemory(bufferAddress, buf);                  
+
+		// invoke read through stubFilesystem                          
+		int bytesWriten = fileDescriptor.file.write(fileDescriptor.position, buf, 0, bytesRead);       
+
+		if (bytesWriten < 0) {                                                 
+			return -1;                                                    
+		}                                                              
+		else {                                                         
+			fileDescriptor.position = fileDescriptor.position + bytesWriten;                        
+			return bytesWriten;                                             
+		}                                                              
 	}
 
 	private int close(int fileAddress){
@@ -554,7 +577,7 @@ public class UserProcess {
 		if(!isChild){
 			return -1;
 		}
-		//TODO create getProcessByID() Method
+
 		UserProcess childProccess = UserKernel.getProcessByID(processID);
 
 		if(childProccess == null){
@@ -647,8 +670,7 @@ public class UserProcess {
 		case syscallRead:
 			return read(a0, a1, a2);
 		case syscallWrite:
-			//TODO: No Idea what is supposed to go here
-			return writeVirtualMemory(a0, null, a2, a3);
+			return write(a0, a1, a2);
 		case syscallClose:
 			return close(a1);
 		case syscallUnlink:
