@@ -28,6 +28,8 @@ public class UserProcess {
 	public static final int MAX_STRING_LENGTH = 256;
 	public static final int MAX_OPEN_FILES = 16;
 	public static final int ROOT = 1;
+	public static final int STDIN = 0; 
+	public static final int STDOUT = 1; 
 	private int processID;
 	private int parentProcessID;
 	private UThread thread; 
@@ -41,6 +43,17 @@ public class UserProcess {
 	 * Allocate a new process.
 	 */
 	public UserProcess() {
+
+		for (int i=0; i<MAX_OPEN_FILES; i++) {                                 
+			fileDescriptors[i] = new FileDescriptor();                            
+		}                                                                   
+                                
+		processID = UserKernel.getNextPid();                       
+
+		/* register this new process in UserKernel's map                           */
+		UserKernel.registerProcess(processID, this);   
+
+
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
 		for (int i=0; i<numPhysPages; i++)
@@ -463,8 +476,10 @@ public class UserProcess {
 
 	private int write(int fileHandler, int bufferAddress, int bufferSize) {
 
-		if (fileHandler < 0 || fileHandler > MAX_OPEN_FILES || fileDescriptors[fileHandler].file == null)                         
-			return -1;                                                
+		if (fileHandler < 0 || fileHandler > MAX_OPEN_FILES || fileDescriptors[fileHandler].file == null){
+			return -1;   
+		}
+
 
 		FileDescriptor fileDescriptor = fileDescriptors[fileHandler];                                  
 
@@ -733,11 +748,11 @@ public class UserProcess {
 
 	public class FileDescriptor {                            
 
-		private  String   filename = "";   // opened file name    
-		private  OpenFile file = null;     // opened file object
-		private  int      position = 0;    // IO position  
+		public  String   filename = "";   // opened file name    
+		public  OpenFile file = null;     // opened file object
+		public  int      position = 0;    // IO position  
 
-		private  boolean  toRemove = false;// if need to remove  
+		public  boolean  toRemove = false;// if need to remove  
 		// this file           
 
 	} 

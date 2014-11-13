@@ -14,6 +14,8 @@ public class UserKernel extends ThreadedKernel {
 	
 	private static LinkedList<Integer> pageTable = new LinkedList<Integer>(); 
    
+	private static int nextPid = 0;  
+	
     private static HashMap<Integer, UserProcess>mapOfProcesses = new HashMap<Integer, UserProcess>();
 	
 	/**
@@ -139,6 +141,15 @@ public class UserKernel extends ThreadedKernel {
 	}
 	
 	
+	
+	  public static int getNextPid() {                               // @BCA 
+	        int retval;                                                // @BCA
+	        Machine.interrupt().disable();                             // @BCA 
+	        retval = ++nextPid;                                        // @BCA 
+	        Machine.interrupt().enabled();                             // @BCA 
+	        return nextPid;                                            // @BCA
+	    }
+	  
 	   /**
      * get process from process map by pid
      */
