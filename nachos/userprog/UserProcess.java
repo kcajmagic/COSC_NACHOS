@@ -47,7 +47,20 @@ public class UserProcess {
 		for (int i=0; i<MAX_OPEN_FILES; i++) {                                 
 			fileDescriptors[i] = new FileDescriptor();                            
 		}                                                                   
-                                
+		/** Comment Out 
+		fileDescriptors[STDIN].file = UserKernel.console.openForReading();
+		fileDescriptors[STDIN].position = 0;
+
+		fileDescriptors[STDOUT].file = UserKernel.console.openForWriting();
+		fileDescriptors[STDOUT].position = 0; 
+		 */
+
+		OpenFile file  = UserKernel.fileSystem.open("out", false);      
+
+		int fileHandle = findEmptyFileDescriptor();                      
+		fileDescriptors[fileHandle].file = file;                           
+		fileDescriptors[fileHandle].position = 0;   
+
 		processID = UserKernel.getNextPid();                       
 
 		/* register this new process in UserKernel's map                           */
@@ -56,8 +69,9 @@ public class UserProcess {
 
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
-		for (int i=0; i<numPhysPages; i++)
-			pageTable[i] = new TranslationEntry(i,i, true,false,false,false);
+		for (int index=0; index<numPhysPages; index++){
+			pageTable[index] = new TranslationEntry(index,index, true,false,false,false);
+		}
 	}
 
 	/**
@@ -410,9 +424,9 @@ public class UserProcess {
 	}
 
 	private int findFileDescriptorByName(String filename) { 
-		for (int i = 0; i < MAX_OPEN_FILES; i++) {                 
-			if (fileDescriptors[i].filename == filename)                
-				return i;                                
+		for (int index = 0; index < MAX_OPEN_FILES; index++) {                 
+			if (fileDescriptors[index].filename == filename)                
+				return index;                                
 		}                                             
 
 		return -1;                           
@@ -521,15 +535,18 @@ public class UserProcess {
 		} else{
 			return 0;
 		}
-
 	}
 
 	private int unlink(int fileAddress){
 		boolean noError = true;
 		String fileName = readVirtualMemoryString(fileAddress, MAX_STRING_LENGTH);
 		int fileHandle = findFileDescriptorByName(fileName);
-
+		
 		if(fileHandle < 0){
+			return -1;
+		}		
+		
+		if(!fileDescriptors[fileHandle].toRemove){
 			noError = UserKernel.fileSystem.remove(fileDescriptors[fileHandle].filename);
 		} else {
 			fileDescriptors[fileHandle].toRemove = true;

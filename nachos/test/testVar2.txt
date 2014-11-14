@@ -1,0 +1,3 @@
+++FILESYSCALL VAR1: calls syscall close
+++FILESYSCALL VAR1: calls syscall unlink to delete testVar2.txt
+++FILESYSCALL VAR1: Failed to delete testVar2.txt 
