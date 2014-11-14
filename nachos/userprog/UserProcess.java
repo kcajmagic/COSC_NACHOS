@@ -46,14 +46,7 @@ public class UserProcess {
 		for (int i=0; i<MAX_OPEN_FILES; i++) {                                 
 			fileDescriptors[i] = new FileDescriptor();                            
 		}                                                                   
-		/** Comment Out */
-	//	fileDescriptors[STDIN].file = UserKernel.console.openForReading();
-	//	fileDescriptors[STDIN].position = 0;
-
-	//	fileDescriptors[STDOUT].file = UserKernel.console.openForWriting();
-	//	fileDescriptors[STDOUT].position = 0; 
 		
-
 		OpenFile file  = UserKernel.fileSystem.open("out", false);      
 
 		int fileHandle = findEmptyFileDescriptor();                      

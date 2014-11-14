@@ -11,13 +11,13 @@ import nachos.userprog.*;
  * A kernel that can support multiple user processes.
  */
 public class UserKernel extends ThreadedKernel {
-	
+
 	private static LinkedList<Integer> pageTable = new LinkedList<Integer>(); 
-   
+
 	private static int nextPid = 0;  
-	
-    private static HashMap<Integer, UserProcess>mapOfProcesses = new HashMap<Integer, UserProcess>();
-	
+
+	private static HashMap<Integer, UserProcess>mapOfProcesses = new HashMap<Integer, UserProcess>();
+
 	/**
 	 * Allocate a new user kernel.
 	 */
@@ -37,8 +37,8 @@ public class UserKernel extends ThreadedKernel {
 		Machine.processor().setExceptionHandler(new Runnable() {
 			public void run() { exceptionHandler(); }
 		});
-		
-		
+
+
 		int numberOfPhysicalPages = Machine.processor().getNumPhysPages();
 		for(int index = 0; index < numberOfPhysicalPages; index++){
 			pageTable.add(index);
@@ -123,7 +123,7 @@ public class UserKernel extends ThreadedKernel {
 		super.terminate();
 	}
 
-	
+
 	public static int getFreePage(){
 		int pageNumber = -1;
 		Machine.interrupt().disable();
@@ -133,57 +133,57 @@ public class UserKernel extends ThreadedKernel {
 		Machine.interrupt().enable();
 		return pageNumber;
 	}
-	
+
 	public static void addFreePage(int pageNumber){
 		Machine.interrupt().disable();
 		pageTable.add(pageNumber);
 		Machine.interrupt().enable();
 	}
-	
-	
-	
-	  public static int getNextPid() {                               // @BCA 
-	        int retval;                                                // @BCA
-	        Machine.interrupt().disable();                             // @BCA 
-	        retval = ++nextPid;                                        // @BCA 
-	        Machine.interrupt().enabled();                             // @BCA 
-	        return nextPid;                                            // @BCA
-	    }
-	  
-	   /**
-     * get process from process map by pid
-     */
-    public static UserProcess getProcessByID(int pid) {
-        return mapOfProcesses.get(pid);
-    }
-    
-    
-    /**
-     * register a process to the map in Kernel 
-     */
-    public static UserProcess registerProcess(int processID, UserProcess process) {  
-        UserProcess insertedProcess;                           
-        Machine.interrupt().disable();                             
-        insertedProcess = mapOfProcesses.put(processID, process);          
-        Machine.interrupt().enabled();                    
-        return insertedProcess;                   
-    }  
-    
-	  /**
-     * unregister a process in the process map 
-     */
-    public static UserProcess unregisterProcess(int processID) {       
-        UserProcess deletedProcess;                               
-        Machine.interrupt().disable();                             
 
-        deletedProcess = mapOfProcesses.remove(processID);                   
 
-        Machine.interrupt().enabled();                          
 
-        return deletedProcess;                                 
-    }   
-	
-	
+	public static int getNextPid() {                               // @BCA 
+		int retval;                                                // @BCA
+		Machine.interrupt().disable();                             // @BCA 
+		retval = ++nextPid;                                        // @BCA 
+		Machine.interrupt().enabled();                             // @BCA 
+		return nextPid;                                            // @BCA
+	}
+
+	/**
+	 * get process from process map by pid
+	 */
+	public static UserProcess getProcessByID(int pid) {
+		return mapOfProcesses.get(pid);
+	}
+
+
+	/**
+	 * register a process to the map in Kernel 
+	 */
+	public static UserProcess registerProcess(int processID, UserProcess process) {  
+		UserProcess insertedProcess;                           
+		Machine.interrupt().disable();                             
+		insertedProcess = mapOfProcesses.put(processID, process);          
+		Machine.interrupt().enabled();                    
+		return insertedProcess;                   
+	}  
+
+	/**
+	 * unregister a process in the process map 
+	 */
+	public static UserProcess unregisterProcess(int processID) {       
+		UserProcess deletedProcess;                               
+		Machine.interrupt().disable();                             
+
+		deletedProcess = mapOfProcesses.remove(processID);                   
+
+		Machine.interrupt().enabled();                          
+
+		return deletedProcess;                                 
+	}   
+
+
 	/** Globally accessible reference to the synchronized console. */
 	public static SynchConsole console;
 
